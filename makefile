@@ -8,6 +8,8 @@ SRC = main.c
 
 NUM_PROCS = 1
 
+ARGS = matrix_examples/input5
+
 all: $(TARGET)
 
 $(TARGET): $(SRC)
@@ -17,7 +19,7 @@ clean:
 	rm -f $(TARGET)
 
 run:
-	mpirun -np $(NUM_PROCS) fox
+	mpirun -np $(NUM_PROCS) fox $(ARGS)
 
 # Phony targets
 .PHONY: all clean run
