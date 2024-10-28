@@ -6,7 +6,7 @@ TARGET = fox
 
 SRC = main.c
 
-NUM_PROCS = 4
+NUM_PROCS = 1
 
 all: $(TARGET)
 
@@ -20,4 +20,4 @@ run:
 	mpirun -np $(NUM_PROCS) fox
 
 # Phony targets
-.PHONY: all clean
+.PHONY: all clean run
