@@ -70,11 +70,11 @@ int main(int argc, char *argv[]){
     freeMatrix(matrix, size);
 
 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    // MPI_Init(&argc, &argv);
+    // MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     // printf("Hello world from proc %d\n",rank);
 
-    MPI_Finalize();
+    // MPI_Finalize();
 }
