@@ -113,10 +113,7 @@ int main(int argc, char *argv[]){
     while(d<size){
         matrix_mult(matrix, size);
         d *=2;
-        print_matrix(matrix, size, size);
-        printf("\n");
     }
-
 
     print_matrix(matrix, size, size);
 
