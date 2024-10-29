@@ -1,6 +1,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <limits.h>
 
 int** read_graph(const char *file_name, int *size){
     int i,j;
@@ -35,7 +36,7 @@ int** read_graph(const char *file_name, int *size){
     return matrix;
 }
 
-void print_matrix(int ** matrix, int rows, int cols) {
+void print_matrix(int **matrix, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             printf("%d ", matrix[i][j]);
@@ -51,6 +52,48 @@ void freeMatrix(int **matrix, int size) {
     free(matrix);
 }
 
+void matrix_mult(int **matrix, int size) {
+    int **result = malloc(size * sizeof(int*));
+
+    for (int i=0; i<size; i++){
+        result[i] = malloc(size * sizeof(int));
+    }
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            if (i == j){
+                result[i][j] = 0;
+                continue;
+            }
+            if (matrix[i][j] == 0){
+                result[i][j] = INT_MAX;
+            }
+            else{
+                result[i][j] = matrix[i][j];
+            }
+            for (int k = 0; k < size; k++) {
+                if (matrix[i][k] != 0 && matrix[k][j] != 0){
+                    int path = matrix[i][k] + matrix[k][j];
+                    if (path < result[i][j] ){
+                        result[i][j] = path;
+                    }
+                }
+            }
+            if (result[i][j] == INT_MAX){
+                result[i][j] = matrix[i][j];
+            }
+        }
+    }
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            matrix[i][j] = result[i][j];
+        }
+    }
+
+    freeMatrix(result, size);
+}
+
 int main(int argc, char *argv[]){
     int numprocs, rank, size;
 
@@ -61,10 +104,20 @@ int main(int argc, char *argv[]){
 
     const char *filename = argv[1];
 
-    int** matrix = read_graph(filename, &size);
+    int **matrix = read_graph(filename, &size);
     if (matrix==NULL){
         return 1;
     }
+
+    int d =1;
+    while(d<size){
+        matrix_mult(matrix, size);
+        d *=2;
+        print_matrix(matrix, size, size);
+        printf("\n");
+    }
+
+
     print_matrix(matrix, size, size);
 
     freeMatrix(matrix, size);

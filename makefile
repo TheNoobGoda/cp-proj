@@ -8,7 +8,7 @@ SRC = main.c
 
 NUM_PROCS = 1
 
-ARGS = matrix_examples/input5
+ARGS = matrix_examples/input6
 
 all: $(TARGET)
 
