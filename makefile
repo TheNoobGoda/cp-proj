@@ -10,9 +10,9 @@ NUM_PROCS = 1
 
 ARGS = matrix_examples/input6
 
-FILE1 = matrix_examples/input5
+FILE1 = matrix_examples/output6
 
-FILE2 = matrix_examples/input5
+FILE2 = result6
 
 all: $(TARGET)
 
@@ -21,6 +21,7 @@ $(TARGET): $(SRC)
 
 clean:
 	rm -f $(TARGET)
+	rm result*
 
 run:
 	mpirun -np $(NUM_PROCS) fox $(ARGS)

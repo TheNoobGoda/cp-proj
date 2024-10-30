@@ -94,6 +94,27 @@ void matrix_mult(int **matrix, int size) {
     freeMatrix(result, size);
 }
 
+int save_result(const char *filename, int **matrix, int size){
+    FILE *file = fopen(filename, "w");
+    if (file == NULL){
+        perror("Error opening file for writing");
+        return 1;
+    }
+
+    for (int i =0; i<size; i++){
+        for (int j=0; j<size; j++){
+            if (j == size-1){
+                fprintf(file,"%d", matrix[i][j]);    
+            }
+            else{fprintf(file,"%d ", matrix[i][j]);}
+        }
+        fprintf(file,"\n");
+    }
+
+    fclose(file);
+    return 0;
+}
+
 int main(int argc, char *argv[]){
     int numprocs, rank, size;
 
@@ -116,6 +137,8 @@ int main(int argc, char *argv[]){
     }
 
     print_matrix(matrix, size, size);
+
+    save_result("result6", matrix, size);
 
     freeMatrix(matrix, size);
 
