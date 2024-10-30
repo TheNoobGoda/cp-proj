@@ -147,6 +147,7 @@ int main(int argc, char *argv[]){
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    int submatrix_size;
 
     if (rank == 0){
 
@@ -160,9 +161,17 @@ int main(int argc, char *argv[]){
         if (q != floor(q) || r != 0){
          MPI_Finalize();
          printf("Wrong\n");
-         return 1;   
+         return 1; 
         }
+
+        submatrix_size = size / sqrt(numprocs);
+
+        freeMatrix(matrix, size);
     }
+
+    
+    MPI_Bcast(&submatrix_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
 
     MPI_Finalize();
 }
