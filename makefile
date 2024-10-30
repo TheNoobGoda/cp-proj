@@ -6,7 +6,7 @@ TARGET = fox
 
 SRC = main.c
 
-NUM_PROCS = 1
+NUM_PROCS = 4
 
 ARGS = matrix_examples/input6
 
@@ -17,14 +17,14 @@ FILE2 = result6
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -o $(TARGET) $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRC) -lm
 
 clean:
 	rm -f $(TARGET)
 	rm result*
 
 run:
-	mpirun -np $(NUM_PROCS) fox $(ARGS)
+	mpirun --oversubscribe -np $(NUM_PROCS) fox $(ARGS)
 
 compare_diff:
 	diff $(FILE1) $(FILE2)

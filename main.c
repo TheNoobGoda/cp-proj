@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <math.h>
 
 int** read_graph(const char *file_name, int *size){
     int i,j;
@@ -125,29 +126,43 @@ int main(int argc, char *argv[]){
 
     const char *filename = argv[1];
 
-    int **matrix = read_graph(filename, &size);
-    if (matrix==NULL){
-        return 1;
+    // int **matrix = read_graph(filename, &size);
+    // if (matrix==NULL){
+    //     return 1;
+    // }
+
+    // int d =1;
+    // while(d<size){
+    //     matrix_mult(matrix, size);
+    //     d *=2;
+    // }
+
+    // print_matrix(matrix, size, size);
+
+    // save_result("result6", matrix, size);
+
+    // freeMatrix(matrix, size);
+
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    if (rank == 0){
+
+        int **matrix = read_graph(filename, &size);
+        if (matrix==NULL){
+            return 1;
+        }
+        double q = sqrt(numprocs);
+        double r = size % (int) q;
+
+        if (q != floor(q) || r != 0){
+         MPI_Finalize();
+         printf("Wrong\n");
+         return 1;   
+        }
     }
 
-    int d =1;
-    while(d<size){
-        matrix_mult(matrix, size);
-        d *=2;
-    }
-
-    print_matrix(matrix, size, size);
-
-    save_result("result6", matrix, size);
-
-    freeMatrix(matrix, size);
-
-
-    // MPI_Init(&argc, &argv);
-    // MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
-    // MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    // printf("Hello world from proc %d\n",rank);
-
-    // MPI_Finalize();
+    MPI_Finalize();
 }
