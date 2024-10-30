@@ -148,11 +148,13 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int submatrix_size;
+    int **matrix;
 
     if (rank == 0){
 
-        int **matrix = read_graph(filename, &size);
+        matrix = read_graph(filename, &size);
         if (matrix==NULL){
+            MPI_Finalize();
             return 1;
         }
         double q = sqrt(numprocs);
@@ -166,11 +168,16 @@ int main(int argc, char *argv[]){
 
         submatrix_size = size / sqrt(numprocs);
 
-        freeMatrix(matrix, size);
     }
 
-    
+    MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&submatrix_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+
+    if (rank == 0){
+        freeMatrix(matrix, size);
+    }
+    
 
 
     MPI_Finalize();
