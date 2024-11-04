@@ -147,6 +147,9 @@ int main(int argc, char *argv[]){
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    MPI_Aint int_length, lb;
+
     int submatrix_size;
     int **matrix;
 
@@ -170,15 +173,27 @@ int main(int argc, char *argv[]){
 
     }
 
+    MPI_Type_get_extent(MPI_INT,&lb, &int_length);
+    int blocklengths[3];
+    blocklengths[0] = int_length*3; blocklengths[1] = int_length*3; blocklengths[2] = int_length*3;
+    MPI_Aint offsets[3];
+    offsets[0] = 0; offsets[1] = int_length*3; offsets[1] = int_length*6;
+    MPI_Datatype oldtypes[3];
+    oldtypes[0] = MPI_INT; oldtypes[1] = MPI_INT; oldtypes[2] = MPI_INT;
+    MPI_Datatype matrixType;
+
+    MPI_Type_create_struct(3, blocklengths, offsets, oldtypes, &matrixType);
+    MPI_Type_commit(&matrixType);
+
     MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&submatrix_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 
+    MPI_Type_free(&matrixType);
+
     if (rank == 0){
         freeMatrix(matrix, size);
     }
-    
-
 
     MPI_Finalize();
 }
