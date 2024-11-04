@@ -129,15 +129,11 @@ void send_matrix(int **matrix, int size, int submatrixsize, int numprocs){
     int row = 0;
 
     for (int i =0 ; i<numprocs; i++){
-        MPI_Bsend(&matrix[col][row], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col][row+1], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col][row+2], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col+1][row], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col+1][row+1], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col+1][row+2], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col+2][row], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col+2][row+1], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-        MPI_Bsend(&matrix[col+2][row+2], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+        for (int j =0; j<submatrixsize; j++){
+            for (int k = 0; k<submatrixsize; k++){
+                MPI_Bsend(&matrix[col+j][row+k], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+            }
+        }
         
         row += submatrixsize;
         if (row>=size){
