@@ -116,7 +116,7 @@ int save_result(const char *filename, int **matrix, int size){
     return 0;
 }
 
-void send_matrix(int **matrix, int size, int submatrixsize){
+void send_matrix(int **matrix, int size, int submatrixsize, int numprocs){
     // int *sendbuf;
     // int pos = 0;
     //MPI_Pack(&matrix[0][index], size, MPI_INT, sendbuf, submatrixsize * submatrixsize, &pos, MPI_COMM_WORLD);
@@ -125,7 +125,11 @@ void send_matrix(int **matrix, int size, int submatrixsize){
 
     //MPI_Bsend(sendbuf, pos, MPI_PACKED, 1, 0, MPI_COMM_WORLD);
 
-    int submatrices = size / submatrixsize;
+    int col = 0;
+
+    for (int i =0 ; i<numprocs; i++){
+
+    }
 
     MPI_Bsend(&matrix[0][0], 3, MPI_INT, 1, 0, MPI_COMM_WORLD);
     MPI_Bsend(&matrix[1][0], 3, MPI_INT, 1, 0, MPI_COMM_WORLD);
