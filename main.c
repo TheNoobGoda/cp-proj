@@ -116,6 +116,53 @@ int save_result(const char *filename, int **matrix, int size){
     return 0;
 }
 
+void send_matrix(int **matrix, int size, int submatrixsize){
+    // int *sendbuf;
+    // int pos = 0;
+    //MPI_Pack(&matrix[0][index], size, MPI_INT, sendbuf, submatrixsize * submatrixsize, &pos, MPI_COMM_WORLD);
+    //MPI_Pack(&matrix[1][index], size, MPI_INT, sendbuf, submatrixsize * submatrixsize, &pos, MPI_COMM_WORLD);
+    //MPI_Pack(&matrix[2][index], size, MPI_INT, sendbuf, submatrixsize * submatrixsize, &pos, MPI_COMM_WORLD);
+
+    //MPI_Bsend(sendbuf, pos, MPI_PACKED, 1, 0, MPI_COMM_WORLD);
+
+    int submatrices = size / submatrixsize;
+
+    MPI_Bsend(&matrix[0][0], 3, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    MPI_Bsend(&matrix[1][0], 3, MPI_INT, 1, 0, MPI_COMM_WORLD);
+    MPI_Bsend(&matrix[2][0], 3, MPI_INT, 1, 0, MPI_COMM_WORLD);
+}
+
+void receive_matrix(int **matrix, int size){
+    int *recbuf = malloc(3 * sizeof(int));
+    int pos = 0;
+
+    for (int j = 0;j<3;j++){
+        MPI_Recv(recbuf, 3, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        for (int i =0;i<3;i++){
+            printf("%d ", recbuf[i]);
+        }
+        printf("\n");
+    }
+
+    
+    // MPI_Recv(&recbuf, size*size, MPI_PACKED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    
+    // int col;
+    // MPI_Unpack(&recbuf, size*size, &pos, &col, size, MPI_INT, MPI_COMM_WORLD);
+    // matrix[0] = &col;
+
+    // int col1;
+    // MPI_Unpack(&recbuf, size*size, &pos, &col1, size, MPI_INT, MPI_COMM_WORLD);
+    // matrix[1] = &col1;
+
+    // int col2;
+    // MPI_Unpack(&recbuf, size*size, &pos, &col2, size, MPI_INT, MPI_COMM_WORLD);
+    // matrix[2] = &col2;
+    
+    free(recbuf);
+
+}
+
 int main(int argc, char *argv[]){
     int numprocs, rank, size;
 
@@ -126,29 +173,9 @@ int main(int argc, char *argv[]){
 
     const char *filename = argv[1];
 
-    // int **matrix = read_graph(filename, &size);
-    // if (matrix==NULL){
-    //     return 1;
-    // }
-
-    // int d =1;
-    // while(d<size){
-    //     matrix_mult(matrix, size);
-    //     d *=2;
-    // }
-
-    // print_matrix(matrix, size, size);
-
-    // save_result("result6", matrix, size);
-
-    // freeMatrix(matrix, size);
-
-
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    MPI_Aint int_length, lb;
 
     int submatrix_size;
     int **matrix;
@@ -173,23 +200,30 @@ int main(int argc, char *argv[]){
 
     }
 
-    MPI_Type_get_extent(MPI_INT,&lb, &int_length);
-    int blocklengths[3];
-    blocklengths[0] = int_length*3; blocklengths[1] = int_length*3; blocklengths[2] = int_length*3;
-    MPI_Aint offsets[3];
-    offsets[0] = 0; offsets[1] = int_length*3; offsets[1] = int_length*6;
-    MPI_Datatype oldtypes[3];
-    oldtypes[0] = MPI_INT; oldtypes[1] = MPI_INT; oldtypes[2] = MPI_INT;
-    MPI_Datatype matrixType;
-
-    MPI_Type_create_struct(3, blocklengths, offsets, oldtypes, &matrixType);
-    MPI_Type_commit(&matrixType);
-
     MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&submatrix_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 
-    MPI_Type_free(&matrixType);
+    int **submatrix = malloc(submatrix_size * sizeof(int*));
+
+    for (int i = 0; i<submatrix_size; i++){
+        submatrix[i] = malloc(submatrix_size * sizeof(int));
+    }
+
+    if (rank == 0){
+        print_matrix(matrix, size, size);
+        printf("sending\n");
+        send_matrix(matrix, size, 3,0);
+        printf("sent\n");
+    }
+
+    if (rank == 1){
+        printf("receiving\n");
+        receive_matrix(submatrix,3);
+        printf("received\n");
+    }
+
+    freeMatrix(submatrix, submatrix_size);
 
     if (rank == 0){
         freeMatrix(matrix, size);
