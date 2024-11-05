@@ -116,63 +116,34 @@ int save_result(const char *filename, int **matrix, int size){
     return 0;
 }
 
-void send_matrix(int **matrix, int size, int submatrixsize, int numprocs){
-    // int *sendbuf;
-    // int pos = 0;
-    //MPI_Pack(&matrix[0][index], size, MPI_INT, sendbuf, submatrixsize * submatrixsize, &pos, MPI_COMM_WORLD);
-    //MPI_Pack(&matrix[1][index], size, MPI_INT, sendbuf, submatrixsize * submatrixsize, &pos, MPI_COMM_WORLD);
-    //MPI_Pack(&matrix[2][index], size, MPI_INT, sendbuf, submatrixsize * submatrixsize, &pos, MPI_COMM_WORLD);
-
-    //MPI_Bsend(sendbuf, pos, MPI_PACKED, 1, 0, MPI_COMM_WORLD);
-
+void send_matrix(int **matrix, int size, int submatrixsize, int numprocs, MPI_Datatype matrixType){
     int col = 0;
     int row = 0;
 
     for (int i =0 ; i<numprocs; i++){
-        for (int j =0; j<submatrixsize; j++){
-            for (int k = 0; k<submatrixsize; k++){
-                MPI_Bsend(&matrix[col+j][row+k], 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-            }
-        }
+        MPI_Bsend(&matrix[row][col], 1, matrixType, i, 0, MPI_COMM_WORLD);
         
-        row += submatrixsize;
-        if (row>=size){
-            row = 0;
-            col += submatrixsize;
+        col += submatrixsize;
+        if (col>=size){
+            col = 0;
+            row += submatrixsize;
         }
     }
+
+    
 }
 
-void receive_matrix(int **matrix, int size){
-    int recbuf;
-    //int pos = 0;
-    for (int i = 0; i<size; i++){
-        for (int j =0; j<size; j++){
-            MPI_Recv(&recbuf, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-            matrix[i][j] = recbuf;
-        }
+void receive_matrix(int **matrix, int size, MPI_Datatype matrixType){
+    int *recbuf = malloc(size*size*sizeof(int));
 
-        // for (int j =0 ; j>size; j++){
-        //     matrix[i][j] = recbuf[j];
-        // }
+    MPI_Recv(recbuf, 1, matrixType, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+    for (int i =0; i<size; i++){
+        for (int j =0; j<size; j++){
+            matrix[i][j] = recbuf[j+i*size];
+        }
     }
 
-    
-    // MPI_Recv(&recbuf, size*size, MPI_PACKED, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    
-    // int col;
-    // MPI_Unpack(&recbuf, size*size, &pos, &col, size, MPI_INT, MPI_COMM_WORLD);
-    // matrix[0] = &col;
-
-    // int col1;
-    // MPI_Unpack(&recbuf, size*size, &pos, &col1, size, MPI_INT, MPI_COMM_WORLD);
-    // matrix[1] = &col1;
-
-    // int col2;
-    // MPI_Unpack(&recbuf, size*size, &pos, &col2, size, MPI_INT, MPI_COMM_WORLD);
-    // matrix[2] = &col2;
-    
-    //free(recbuf);
 
 }
 
@@ -223,12 +194,18 @@ int main(int argc, char *argv[]){
         submatrix[i] = malloc(submatrix_size * sizeof(int));
     }
 
+    MPI_Datatype matrixType;
+
+    MPI_Type_vector(submatrix_size, submatrix_size, size,  MPI_INT, &matrixType);
+    MPI_Type_commit(&matrixType);
+
+
     if (rank == 0){
         print_matrix(matrix, size, size);
-        send_matrix(matrix, size, submatrix_size, numprocs);
+        send_matrix(matrix, size, submatrix_size, numprocs, matrixType);
     }
 
-    receive_matrix(submatrix,submatrix_size);
+    receive_matrix(submatrix,submatrix_size, matrixType);
 
     printf("rank: %d\n",rank);
     print_matrix(submatrix, submatrix_size, submatrix_size);
@@ -238,6 +215,8 @@ int main(int argc, char *argv[]){
     if (rank == 0){
         freeMatrix(matrix, size);
     }
+
+    MPI_Type_free(&matrixType);
 
     MPI_Finalize();
 }
