@@ -225,10 +225,10 @@ int main(int argc, char *argv[]){
 
     if (rank == 0){
         print_matrix(matrix, size, size);
-        send_matrix(matrix, size, 3, numprocs);
+        send_matrix(matrix, size, submatrix_size, numprocs);
     }
 
-    receive_matrix(submatrix,3);
+    receive_matrix(submatrix,submatrix_size);
 
     printf("rank: %d\n",rank);
     print_matrix(submatrix, submatrix_size, submatrix_size);
