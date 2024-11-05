@@ -116,21 +116,27 @@ int save_result(const char *filename, int **matrix, int size){
     return 0;
 }
 
-void send_matrix(int **matrix, int size, int submatrixsize, int numprocs, MPI_Datatype matrixType){
+void flatten_matrix(int **matrix, int *flat_matrix, int size){
+    for (int i=0; i<size; i++){
+        for (int j=0; j<size; j++){
+            flat_matrix[j+i*size] = matrix[i][j];
+        }
+    }
+}
+
+void send_matrix(int *flat_matrix, int size, int submatrixsize, int numprocs, MPI_Datatype matrixType){
     int col = 0;
     int row = 0;
 
     for (int i =0 ; i<numprocs; i++){
-        MPI_Bsend(&matrix[row][col], 1, matrixType, i, 0, MPI_COMM_WORLD);
+        MPI_Bsend(&flat_matrix[col+row*size], 1, matrixType, i, 0, MPI_COMM_WORLD);
         
         col += submatrixsize;
         if (col>=size){
             col = 0;
             row += submatrixsize;
         }
-    }
-
-    
+    } 
 }
 
 void receive_matrix(int **matrix, int size, MPI_Datatype matrixType){
@@ -143,8 +149,6 @@ void receive_matrix(int **matrix, int size, MPI_Datatype matrixType){
             matrix[i][j] = recbuf[j+i*size];
         }
     }
-
-
 }
 
 int main(int argc, char *argv[]){
@@ -163,6 +167,7 @@ int main(int argc, char *argv[]){
 
     int submatrix_size;
     int **matrix;
+    int *flat_matrix;
 
     if (rank == 0){
 
@@ -181,6 +186,8 @@ int main(int argc, char *argv[]){
         }
 
         submatrix_size = size / sqrt(numprocs);
+        flat_matrix = malloc(size*size*sizeof(int));
+        flatten_matrix(matrix, flat_matrix, size);
 
     }
 
@@ -202,7 +209,7 @@ int main(int argc, char *argv[]){
 
     if (rank == 0){
         print_matrix(matrix, size, size);
-        send_matrix(matrix, size, submatrix_size, numprocs, matrixType);
+        send_matrix(flat_matrix, size, submatrix_size, numprocs, matrixType);
     }
 
     receive_matrix(submatrix,submatrix_size, matrixType);
@@ -214,6 +221,7 @@ int main(int argc, char *argv[]){
 
     if (rank == 0){
         freeMatrix(matrix, size);
+        free(flat_matrix);
     }
 
     MPI_Type_free(&matrixType);
