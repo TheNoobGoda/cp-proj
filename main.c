@@ -116,10 +116,29 @@ int save_result(const char *filename, int **matrix, int size){
     return 0;
 }
 
-void flatten_matrix(int **matrix, int *flat_matrix, int size){
+void flatten_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize, int numprocs){
+    int row = 0;
+    int col = 0;
+    int pos = 0;
+    for (int i =0; i<numprocs; i++){
+        for (int j = 0; j<submatrixsize; j++){
+            for (int k = 0; k<submatrixsize; k++){
+                flat_matrix[pos] = matrix[row+j][col+k];
+                pos ++;
+            }
+        }
+        col += submatrixsize;
+        if (col>=size){
+            col = 0;
+            row += submatrixsize;
+        }
+    }
+}
+
+void unflatten_matrix(int **matrix, int *flat_matrix, int size){
     for (int i=0; i<size; i++){
         for (int j=0; j<size; j++){
-            flat_matrix[j+i*size] = matrix[i][j];
+            matrix[i][j] = flat_matrix[j+i*size];
         }
     }
 }
@@ -194,13 +213,19 @@ int main(int argc, char *argv[]){
         }
 
         submatrix_size = size / sqrt(numprocs);
-        flat_matrix = malloc(size*size*sizeof(int));
-        flatten_matrix(matrix, flat_matrix, size);
-
+        
     }
 
     MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&submatrix_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    flat_matrix = malloc(size*size*sizeof(int));
+    
+    if (rank == 0){flatten_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);}
+
+    int *flat_submatrix = malloc(submatrix_size*submatrix_size*sizeof(int));
+
+    MPI_Scatter(flat_matrix, submatrix_size*submatrix_size, MPI_INT, flat_submatrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
 
 
     int **submatrix = malloc(submatrix_size * sizeof(int*));
@@ -209,32 +234,18 @@ int main(int argc, char *argv[]){
         submatrix[i] = malloc(submatrix_size * sizeof(int));
     }
 
-    MPI_Datatype matrixType;
+    unflatten_matrix(submatrix, flat_submatrix, submatrix_size);
 
-    printf("matrixtype: %d %d\n",submatrix_size, size);
-
-    MPI_Type_vector(submatrix_size, submatrix_size, size,  MPI_INT, &matrixType);
-    MPI_Type_commit(&matrixType);
-
-
-    if (rank == 0){
-        print_matrix(matrix, size, size);
-        send_matrix(flat_matrix, size, submatrix_size, numprocs, matrixType);
-    }
-
-    receive_matrix(submatrix,submatrix_size, matrixType);
-
-    printf("rank: %d\n",rank);
+    printf("rank: %d\n", rank);
     print_matrix(submatrix, submatrix_size, submatrix_size);
 
     freeMatrix(submatrix, submatrix_size);
+    free(flat_submatrix);
 
     if (rank == 0){
         freeMatrix(matrix, size);
         free(flat_matrix);
     }
-
-    MPI_Type_free(&matrixType);
 
     MPI_Finalize();
 }
