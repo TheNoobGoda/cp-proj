@@ -144,6 +144,14 @@ void receive_matrix(int **matrix, int size, MPI_Datatype matrixType){
 
     MPI_Recv(recbuf, 1, matrixType, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
+    printf("buffer: ");
+
+    for (int i =0;i<size*size; i++){
+        printf("%d ",recbuf[i]);
+    }
+
+    printf("\n");
+
     for (int i =0; i<size; i++){
         for (int j =0; j<size; j++){
             matrix[i][j] = recbuf[j+i*size];
@@ -202,6 +210,8 @@ int main(int argc, char *argv[]){
     }
 
     MPI_Datatype matrixType;
+
+    printf("matrixtype: %d %d\n",submatrix_size, size);
 
     MPI_Type_vector(submatrix_size, submatrix_size, size,  MPI_INT, &matrixType);
     MPI_Type_commit(&matrixType);
