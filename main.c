@@ -135,6 +135,27 @@ void flatten_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize,
     }
 }
 
+void unflatten_main_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize, int numprocs){
+    int row = 0;
+    int col = 0;
+    int pos = 0;
+
+    for (int i=0; i<numprocs; i++){
+        for (int j=0; j<submatrixsize; j++){
+            for (int k=0; k<submatrixsize; k++){
+                matrix[row+j][col+k] = flat_matrix[pos];
+                pos ++;
+            }
+        }
+        col += submatrixsize;
+        if (col>=size){
+            col = 0;
+            row += submatrixsize;
+        }
+    }
+    
+}
+
 void unflatten_matrix(int **matrix, int *flat_matrix, int size){
     for (int i=0; i<size; i++){
         for (int j=0; j<size; j++){
@@ -236,13 +257,14 @@ int main(int argc, char *argv[]){
 
     unflatten_matrix(submatrix, flat_submatrix, submatrix_size);
 
-    printf("rank: %d\n", rank);
-    print_matrix(submatrix, submatrix_size, submatrix_size);
+    MPI_Gather(flat_submatrix, submatrix_size*submatrix_size, MPI_INT, flat_matrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
 
     freeMatrix(submatrix, submatrix_size);
     free(flat_submatrix);
 
     if (rank == 0){
+        unflatten_main_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);
+        print_matrix(matrix, size, size);
         freeMatrix(matrix, size);
         free(flat_matrix);
     }
