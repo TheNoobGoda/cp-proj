@@ -216,6 +216,8 @@ int main(int argc, char *argv[]){
 
     int submatrix_size;
     int **matrix;
+    double q = sqrt(numprocs);
+    double r = size % (int) q;
 
     // matrix read
     if (rank == 0){
@@ -225,8 +227,6 @@ int main(int argc, char *argv[]){
             MPI_Finalize();
             return 1;
         }
-        double q = sqrt(numprocs);
-        double r = size % (int) q;
 
         if (q != floor(q) || r != 0){
          MPI_Finalize();
@@ -266,7 +266,23 @@ int main(int argc, char *argv[]){
     unflatten_matrix(submatrix, flat_submatrix, submatrix_size);
 
     //fox algorithm
+    MPI_Group world_group;
+    MPI_Group *group_vector = malloc(q * sizeof(MPI_Group));
+    MPI_Comm *comm_vector = malloc(q * sizeof(MPI_Comm));
 
+    MPI_Comm_group(MPI_COMM_WORLD, &world_group);
+    for (int i=0; i<q; i++){
+        int *ranks = malloc(q * sizeof(int));
+        for (int j=0; j<q; j++){
+            ranks[j] = q*i+j;
+        }
+
+        MPI_Group_incl(world_group, q, ranks, &group_vector[i]);
+        MPI_Comm_create(MPI_COMM_WORLD, group_vector[i], &comm_vector[i]);
+        MPI_Group_free(&group_vector[i]);
+        free(ranks);
+    }
+    MPI_Group_free(&world_group);
 
     // gather matrix
     MPI_Gather(flat_submatrix, submatrix_size*submatrix_size, MPI_INT, flat_matrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
@@ -281,6 +297,13 @@ int main(int argc, char *argv[]){
         print_matrix(matrix, size, size);
         freeMatrix(matrix, size);
         free(flat_matrix);
+    }
+
+    for (int i=0; i<q; i++){
+        if (comm_vector[i] != MPI_COMM_NULL){
+            MPI_Comm_free(&comm_vector[i]);
+        }
+        
     }
 
     MPI_Finalize();
