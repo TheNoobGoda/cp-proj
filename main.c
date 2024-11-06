@@ -200,6 +200,7 @@ void receive_matrix(int **matrix, int size, MPI_Datatype matrixType){
 }
 
 int main(int argc, char *argv[]){
+    // func init
     int numprocs, rank, size;
 
     if (argc != 2) {
@@ -215,8 +216,8 @@ int main(int argc, char *argv[]){
 
     int submatrix_size;
     int **matrix;
-    int *flat_matrix;
 
+    // matrix read
     if (rank == 0){
 
         matrix = read_graph(filename, &size);
@@ -240,26 +241,39 @@ int main(int argc, char *argv[]){
     MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&submatrix_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    flat_matrix = malloc(size*size*sizeof(int));
-    
-    if (rank == 0){flatten_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);}
-
-    int *flat_submatrix = malloc(submatrix_size*submatrix_size*sizeof(int));
-
-    MPI_Scatter(flat_matrix, submatrix_size*submatrix_size, MPI_INT, flat_submatrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
-
-
+    //matrices initialization
     int **submatrix = malloc(submatrix_size * sizeof(int*));
 
     for (int i = 0; i<submatrix_size; i++){
         submatrix[i] = malloc(submatrix_size * sizeof(int));
     }
 
+    int **result_submatrix = malloc(submatrix_size * sizeof(int*));
+
+    for (int i = 0; i<submatrix_size; i++){
+        result_submatrix[i] = malloc(submatrix_size * sizeof(int));
+    }
+
+    int *flat_matrix = malloc(size*size*sizeof(int));
+
+    int *flat_submatrix = malloc(submatrix_size*submatrix_size*sizeof(int));
+
+    // distribute matrix    
+    if (rank == 0){flatten_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);}
+
+    MPI_Scatter(flat_matrix, submatrix_size*submatrix_size, MPI_INT, flat_submatrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
+    
     unflatten_matrix(submatrix, flat_submatrix, submatrix_size);
 
+    //fox algorithm
+
+
+    // gather matrix
     MPI_Gather(flat_submatrix, submatrix_size*submatrix_size, MPI_INT, flat_matrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
 
+    // free memory
     freeMatrix(submatrix, submatrix_size);
+    freeMatrix(result_submatrix, submatrix_size);
     free(flat_submatrix);
 
     if (rank == 0){
