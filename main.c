@@ -303,17 +303,22 @@ int main(int argc, char *argv[]){
     int source = col_rank+1;
     if (source == q){source = 0;}
 
+    int broadcast_row_rank = col_rank;
+
     for (int i=0; i<q; i++){
         flatten_matrix(submatrix_b, flat_submatrix_b, submatrix_size);
         if (row_rank == i){
             flatten_matrix(submatrix, flat_aux_matrix, submatrix_size);
-        }        
-        MPI_Bcast(flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, i, row_comm);
+        }      
+        printf("%d %d %d\n",rank, broadcast_row_rank,i);  
+        MPI_Bcast(flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, broadcast_row_rank, row_comm);
         unflatten_matrix(aux_matrix, flat_aux_matrix, submatrix_size);
         min_plus_matrix_mult(aux_matrix, submatrix, result_submatrix, submatrix_size);
         
         MPI_Sendrecv(flat_submatrix_b, submatrix_size*submatrix_size, MPI_INT, dest, 0, flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, source, 0, col_comm, MPI_STATUS_IGNORE);
         unflatten_matrix(submatrix_b, flat_aux_matrix, submatrix_size);
+        broadcast_row_rank ++;
+        if (broadcast_row_rank >= q){broadcast_row_rank = 0;}
     }
     MPI_Comm_free(&row_comm);
     MPI_Comm_free(&col_comm);
@@ -321,6 +326,7 @@ int main(int argc, char *argv[]){
     // gather matrix
     flatten_matrix(result_submatrix, flat_submatrix, submatrix_size);
     MPI_Gather(flat_submatrix, submatrix_size*submatrix_size, MPI_INT, flat_matrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
 
     // free memory
     freeMatrix(submatrix_b, submatrix_size);

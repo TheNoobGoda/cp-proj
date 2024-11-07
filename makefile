@@ -8,7 +8,7 @@ SRC = main.c
 
 NUM_PROCS = 4
 
-ARGS = matrix_examples/input16
+ARGS = matrix_examples/input6
 
 FILE1 = matrix_examples/output6
 
