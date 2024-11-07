@@ -6,9 +6,9 @@ TARGET = fox
 
 SRC = main.c
 
-NUM_PROCS = 4
+NUM_PROCS = 16
 
-ARGS = matrix_examples/input6
+ARGS = matrix_examples/input16
 
 FILE1 = matrix_examples/output6
 

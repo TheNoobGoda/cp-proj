@@ -271,10 +271,9 @@ int main(int argc, char *argv[]){
 
     //fox algorithm
     MPI_Comm row_comm;
-    MPI_Comm_split(MPI_COMM_WORLD, rank % (int)q, rank, &row_comm);
+    MPI_Comm_split(MPI_COMM_WORLD, (int)floor(rank / q), rank, &row_comm);
     int row_rank;
     MPI_Comm_rank(row_comm, &row_rank);
-    printf("World rank: %d, row rank: %d\n",rank,row_rank);
     MPI_Comm_free(&row_comm);
 
     // gather matrix
