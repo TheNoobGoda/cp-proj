@@ -194,7 +194,7 @@ void copy_matrix (int **original_matrix, int **new_matrix, int size){
 
 int main(int argc, char *argv[]){
     // func init
-    int numprocs, rank, size;
+    int numprocs, rank;
 
     if (argc != 2) {
         printf("Usage: %s <filename>\n", argv[0]);
@@ -207,7 +207,7 @@ int main(int argc, char *argv[]){
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
-    int submatrix_size;
+    int submatrix_size, size;
     int **matrix;
     double q;
 
@@ -310,7 +310,6 @@ int main(int argc, char *argv[]){
         if (row_rank == i){
             flatten_matrix(submatrix, flat_aux_matrix, submatrix_size);
         }      
-        printf("%d %d %d\n",rank, broadcast_row_rank,i);  
         MPI_Bcast(flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, broadcast_row_rank, row_comm);
         unflatten_matrix(aux_matrix, flat_aux_matrix, submatrix_size);
         min_plus_matrix_mult(aux_matrix, submatrix, result_submatrix, submatrix_size);
