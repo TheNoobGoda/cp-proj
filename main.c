@@ -53,46 +53,23 @@ void freeMatrix(int **matrix, int size) {
     free(matrix);
 }
 
-void matrix_mult(int **matrix, int size) {
-    int **result = malloc(size * sizeof(int*));
-
-    for (int i=0; i<size; i++){
-        result[i] = malloc(size * sizeof(int));
-    }
-
+void min_plus_matrix_mult(int **matrix_a, int **matrix_b, int **result, int size) {
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            if (i == j){
-                result[i][j] = 0;
-                continue;
-            }
-            if (matrix[i][j] == 0){
+            if (result[i][j] == 0){
                 result[i][j] = INT_MAX;
             }
-            else{
-                result[i][j] = matrix[i][j];
-            }
             for (int k = 0; k < size; k++) {
-                if (matrix[i][k] != 0 && matrix[k][j] != 0){
-                    int path = matrix[i][k] + matrix[k][j];
-                    if (path < result[i][j] ){
-                        result[i][j] = path;
-                    }
+                int path = matrix_a[i][k] + matrix_b[k][j];
+                if (path < result[i][j]){
+                    result[i][j] = path;
                 }
             }
             if (result[i][j] == INT_MAX){
-                result[i][j] = matrix[i][j];
+                result[i][j] = 0;
             }
         }
     }
-
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            matrix[i][j] = result[i][j];
-        }
-    }
-
-    freeMatrix(result, size);
 }
 
 int save_result(const char *filename, int **matrix, int size){
@@ -116,7 +93,7 @@ int save_result(const char *filename, int **matrix, int size){
     return 0;
 }
 
-void flatten_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize, int numprocs){
+void flatten_main_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize, int numprocs){
     int row = 0;
     int col = 0;
     int pos = 0;
@@ -131,6 +108,14 @@ void flatten_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize,
         if (col>=size){
             col = 0;
             row += submatrixsize;
+        }
+    }
+}
+
+void flatten_matrix(int **matrix, int *flat_matrix, int size){
+    for (int i=0; i<size; i++){
+        for (int j=0; j<size; j++){
+            flat_matrix[j+i*size] = matrix[i][j];
         }
     }
 }
@@ -199,6 +184,14 @@ void receive_matrix(int **matrix, int size, MPI_Datatype matrixType){
     }
 }
 
+void copy_matrix (int **original_matrix, int **new_matrix, int size){
+    for (int i =0; i<size; i++){
+        for (int j=0; j<size; j++){
+            new_matrix[i][j] = original_matrix[i][j];
+        }
+    }
+}
+
 int main(int argc, char *argv[]){
     // func init
     int numprocs, rank, size;
@@ -252,18 +245,40 @@ int main(int argc, char *argv[]){
         submatrix[i] = malloc(submatrix_size * sizeof(int));
     }
 
+    int **submatrix_b = malloc(submatrix_size * sizeof(int*));
+
+    for (int i = 0; i<submatrix_size; i++){
+        submatrix_b[i] = malloc(submatrix_size * sizeof(int));
+    }
+
     int **result_submatrix = malloc(submatrix_size * sizeof(int*));
 
     for (int i = 0; i<submatrix_size; i++){
         result_submatrix[i] = malloc(submatrix_size * sizeof(int));
     }
 
+    for (int i=0; i<submatrix_size; i++){
+        for (int j=0; j<submatrix_size; j++){
+            result_submatrix[0][0] = 0;
+        }
+    }
+
     int *flat_matrix = malloc(size*size*sizeof(int));
 
     int *flat_submatrix = malloc(submatrix_size*submatrix_size*sizeof(int));
+
+    int **aux_matrix = malloc(submatrix_size * sizeof(int*));
+
+    for (int i = 0; i<submatrix_size; i++){
+        aux_matrix[i] = malloc(submatrix_size * sizeof(int));
+    }
+
+    int *flat_submatrix_b = malloc(submatrix_size*submatrix_size * sizeof(int));
+
+    int *flat_aux_matrix = malloc(submatrix_size*submatrix_size * sizeof(int));
     
     // distribute matrix    
-    if (rank == 0){flatten_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);}
+    if (rank == 0){flatten_main_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);}
 
     MPI_Scatter(flat_matrix, submatrix_size*submatrix_size, MPI_INT, flat_submatrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
     
@@ -274,15 +289,46 @@ int main(int argc, char *argv[]){
     MPI_Comm_split(MPI_COMM_WORLD, (int)floor(rank / q), rank, &row_comm);
     int row_rank;
     MPI_Comm_rank(row_comm, &row_rank);
+
+    MPI_Comm col_comm;
+    MPI_Comm_split(MPI_COMM_WORLD, rank % (int)q, rank, &col_comm);
+    int col_rank;
+    MPI_Comm_rank(col_comm, &col_rank);
+
+    copy_matrix(submatrix, submatrix_b, submatrix_size);
+
+    int dest = col_rank-1;
+    if (dest == -1){dest = q-1;}
+
+    int source = col_rank+1;
+    if (source == q){source = 0;}
+
+    for (int i=0; i<q; i++){
+        flatten_matrix(submatrix_b, flat_submatrix_b, submatrix_size);
+        if (row_rank == i){
+            flatten_matrix(submatrix, flat_aux_matrix, submatrix_size);
+        }        
+        MPI_Bcast(flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, i, row_comm);
+        unflatten_matrix(aux_matrix, flat_aux_matrix, submatrix_size);
+        min_plus_matrix_mult(aux_matrix, submatrix, result_submatrix, submatrix_size);
+        
+        MPI_Sendrecv(flat_submatrix_b, submatrix_size*submatrix_size, MPI_INT, dest, 0, flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, source, 0, col_comm, MPI_STATUS_IGNORE);
+        unflatten_matrix(submatrix_b, flat_aux_matrix, submatrix_size);
+    }
     MPI_Comm_free(&row_comm);
+    MPI_Comm_free(&col_comm);
 
     // gather matrix
+    flatten_matrix(result_submatrix, flat_submatrix, submatrix_size);
     MPI_Gather(flat_submatrix, submatrix_size*submatrix_size, MPI_INT, flat_matrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
 
     // free memory
+    freeMatrix(submatrix_b, submatrix_size);
+    freeMatrix(aux_matrix, submatrix_size);
     freeMatrix(submatrix, submatrix_size);
     freeMatrix(result_submatrix, submatrix_size);
     free(flat_submatrix);
+    free(flat_aux_matrix);
 
     if (rank == 0){
         unflatten_main_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);

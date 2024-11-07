@@ -6,7 +6,7 @@ TARGET = fox
 
 SRC = main.c
 
-NUM_PROCS = 16
+NUM_PROCS = 4
 
 ARGS = matrix_examples/input16
 
