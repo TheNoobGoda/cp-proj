@@ -151,42 +151,7 @@ void unflatten_matrix(int **matrix, int *flat_matrix, int size){
     }
 }
 
-void send_matrix(int *flat_matrix, int size, int submatrixsize, int numprocs, MPI_Datatype matrixType){
-    int col = 0;
-    int row = 0;
-
-    for (int i =0 ; i<numprocs; i++){
-        MPI_Bsend(&flat_matrix[col+row*size], 1, matrixType, i, 0, MPI_COMM_WORLD);
-        
-        col += submatrixsize;
-        if (col>=size){
-            col = 0;
-            row += submatrixsize;
-        }
-    } 
-}
-
-void receive_matrix(int **matrix, int size, MPI_Datatype matrixType){
-    int *recbuf = malloc(size*size*sizeof(int));
-
-    MPI_Recv(recbuf, 1, matrixType, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    printf("buffer: ");
-
-    for (int i =0;i<size*size; i++){
-        printf("%d ",recbuf[i]);
-    }
-
-    printf("\n");
-
-    for (int i =0; i<size; i++){
-        for (int j =0; j<size; j++){
-            matrix[i][j] = recbuf[j+i*size];
-        }
-    }
-}
-
-void copy_matrix (int **original_matrix, int **new_matrix, int size){
+void copy_matrix(int **original_matrix, int **new_matrix, int size){
     for (int i =0; i<size; i++){
         for (int j=0; j<size; j++){
             new_matrix[i][j] = original_matrix[i][j];
@@ -212,7 +177,6 @@ int main(int argc, char *argv[]){
     int submatrix_size, size;
     int **matrix;
     double q;
-
 
     // matrix read
     if (rank == 0){
