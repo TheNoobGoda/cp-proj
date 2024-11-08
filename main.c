@@ -60,9 +60,11 @@ void min_plus_matrix_mult(int **matrix_a, int **matrix_b, int **result, int size
                 result[i][j] = INT_MAX;
             }
             for (int k = 0; k < size; k++) {
-                int path = matrix_a[i][k] + matrix_b[k][j];
-                if (path < result[i][j]){
-                    result[i][j] = path;
+                if (matrix_a[i][k] != 0 && matrix_b[k][j] != 0){
+                    int path = matrix_a[i][k] + matrix_b[k][j];
+                    if (path < result[i][j]){
+                        result[i][j] = path;
+                    }
                 }
             }
             if (result[i][j] == INT_MAX){
@@ -239,11 +241,17 @@ int main(int argc, char *argv[]){
     MPI_Bcast(&q, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
     //matrices initialization
+    int *flat_matrix = malloc(size*size*sizeof(int));
+    
+
     int **submatrix = malloc(submatrix_size * sizeof(int*));
 
     for (int i = 0; i<submatrix_size; i++){
         submatrix[i] = malloc(submatrix_size * sizeof(int));
     }
+
+    int *flat_submatrix = malloc(submatrix_size*submatrix_size*sizeof(int));
+
 
     int **submatrix_b = malloc(submatrix_size * sizeof(int*));
 
@@ -251,21 +259,8 @@ int main(int argc, char *argv[]){
         submatrix_b[i] = malloc(submatrix_size * sizeof(int));
     }
 
-    int **result_submatrix = malloc(submatrix_size * sizeof(int*));
+    int *flat_submatrix_b = malloc(submatrix_size*submatrix_size * sizeof(int));
 
-    for (int i = 0; i<submatrix_size; i++){
-        result_submatrix[i] = malloc(submatrix_size * sizeof(int));
-    }
-
-    for (int i=0; i<submatrix_size; i++){
-        for (int j=0; j<submatrix_size; j++){
-            result_submatrix[0][0] = 0;
-        }
-    }
-
-    int *flat_matrix = malloc(size*size*sizeof(int));
-
-    int *flat_submatrix = malloc(submatrix_size*submatrix_size*sizeof(int));
 
     int **aux_matrix = malloc(submatrix_size * sizeof(int*));
 
@@ -273,9 +268,14 @@ int main(int argc, char *argv[]){
         aux_matrix[i] = malloc(submatrix_size * sizeof(int));
     }
 
-    int *flat_submatrix_b = malloc(submatrix_size*submatrix_size * sizeof(int));
-
     int *flat_aux_matrix = malloc(submatrix_size*submatrix_size * sizeof(int));
+
+
+    int **result_submatrix = malloc(submatrix_size * sizeof(int*));
+
+    for (int i = 0; i<submatrix_size; i++){
+        result_submatrix[i] = malloc(submatrix_size * sizeof(int));
+    }
     
     // distribute matrix    
     if (rank == 0){flatten_main_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);}
@@ -283,6 +283,8 @@ int main(int argc, char *argv[]){
     MPI_Scatter(flat_matrix, submatrix_size*submatrix_size, MPI_INT, flat_submatrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
     
     unflatten_matrix(submatrix, flat_submatrix, submatrix_size);
+
+    copy_matrix(submatrix, result_submatrix, submatrix_size);
 
     //fox algorithm
     MPI_Comm row_comm;
@@ -305,27 +307,36 @@ int main(int argc, char *argv[]){
 
     int broadcast_row_rank = col_rank;
 
-    for (int i=0; i<q; i++){
-        flatten_matrix(submatrix_b, flat_submatrix_b, submatrix_size);
-        if (row_rank == i){
-            flatten_matrix(submatrix, flat_aux_matrix, submatrix_size);
-        }      
-        MPI_Bcast(flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, broadcast_row_rank, row_comm);
-        unflatten_matrix(aux_matrix, flat_aux_matrix, submatrix_size);
-        min_plus_matrix_mult(aux_matrix, submatrix, result_submatrix, submatrix_size);
-        
-        MPI_Sendrecv(flat_submatrix_b, submatrix_size*submatrix_size, MPI_INT, dest, 0, flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, source, 0, col_comm, MPI_STATUS_IGNORE);
-        unflatten_matrix(submatrix_b, flat_aux_matrix, submatrix_size);
-        broadcast_row_rank ++;
-        if (broadcast_row_rank >= q){broadcast_row_rank = 0;}
+    for (int j=0; j<size; j++){
+        for (int i=0; i<q; i++){
+            flatten_matrix(submatrix_b, flat_submatrix_b, submatrix_size);
+            if (row_rank == broadcast_row_rank){
+                flatten_matrix(submatrix, flat_aux_matrix, submatrix_size);
+            }      
+            MPI_Bcast(flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, broadcast_row_rank, row_comm);
+            unflatten_matrix(aux_matrix, flat_aux_matrix, submatrix_size);
+
+            min_plus_matrix_mult(aux_matrix, submatrix, result_submatrix, submatrix_size);
+
+            MPI_Sendrecv(flat_submatrix_b, submatrix_size*submatrix_size, MPI_INT, dest, 0, flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, source, 0, col_comm, MPI_STATUS_IGNORE);
+            unflatten_matrix(submatrix_b, flat_aux_matrix, submatrix_size);
+            broadcast_row_rank ++;
+            if (broadcast_row_rank >= q){broadcast_row_rank = 0;}
+
+            // if (rank == 1){
+            //     print_matrix(result_submatrix, submatrix_size, submatrix_size);
+            //     printf("\n");
+            // }
+        }
     }
+
+    
     MPI_Comm_free(&row_comm);
     MPI_Comm_free(&col_comm);
 
     // gather matrix
     flatten_matrix(result_submatrix, flat_submatrix, submatrix_size);
     MPI_Gather(flat_submatrix, submatrix_size*submatrix_size, MPI_INT, flat_matrix, submatrix_size*submatrix_size, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Barrier(MPI_COMM_WORLD);
 
     // free memory
     freeMatrix(submatrix_b, submatrix_size);
