@@ -4,6 +4,13 @@
 #include <limits.h>
 #include <math.h>
 
+/**
+ * Reads a graph in the form of a adjacency matrix.
+ * @param[in] file_name
+ * @param[out] size
+ * @return The matrix read from the file
+ */ 
+
 int** read_graph(const char *file_name, int *size){
     int i,j;
 
@@ -37,6 +44,12 @@ int** read_graph(const char *file_name, int *size){
     return matrix;
 }
 
+/**
+ * Prints the input matrix to the console
+ * @param[in] matrix
+ * @param[in] rows
+ * @param[in] cols
+ */
 void print_matrix(int **matrix, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
@@ -46,6 +59,11 @@ void print_matrix(int **matrix, int rows, int cols) {
     }
 }
 
+/**
+ * Frees the memory occupied by a matrix
+ * @param[in] matrix
+ * @param[in] size
+ */
 void freeMatrix(int **matrix, int size) {
     for (int i = 0; i < size; i++) {
         free(matrix[i]);
@@ -53,6 +71,14 @@ void freeMatrix(int **matrix, int size) {
     free(matrix);
 }
 
+/**
+ * Min-plus multiplication of the matrix to calculate the shortest path between pairs of nodes of a graph in the form of a adjacency matrix
+ * @param[in] matrix_a
+ * @param[in] matrix_b
+ * @param[in] result
+ * @param[in] size
+ * @param[out] result
+ */
 void min_plus_matrix_mult(int **matrix_a, int **matrix_b, int **result, int size) {
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -74,6 +100,12 @@ void min_plus_matrix_mult(int **matrix_a, int **matrix_b, int **result, int size
     }
 }
 
+/**
+ * Saves the matrix in a file
+ * @param[in] filename
+ * @param[in] matrix
+ * @param[in] size
+ */
 int save_result(const char *filename, int **matrix, int size){
     FILE *file = fopen(filename, "w");
     if (file == NULL){
@@ -95,6 +127,14 @@ int save_result(const char *filename, int **matrix, int size){
     return 0;
 }
 
+/**
+ * Flattens and prepares a matrix to be scaterred trhough all the processes
+ * @param[in] matrix
+ * @param[out] flat_matrix
+ * @param[in] size
+ * @param[in] submatrixsize
+ * @param[in] numprocs
+ */
 void flatten_main_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize, int numprocs){
     int row = 0;
     int col = 0;
@@ -114,6 +154,12 @@ void flatten_main_matrix(int **matrix, int *flat_matrix, int size, int submatrix
     }
 }
 
+/**
+ * Flattens a matrix in to a vector
+ * @param[in] matrix
+ * @param[out] flat_matrix
+ * @param[in] size
+ */
 void flatten_matrix(int **matrix, int *flat_matrix, int size){
     for (int i=0; i<size; i++){
         for (int j=0; j<size; j++){
@@ -122,6 +168,14 @@ void flatten_matrix(int **matrix, int *flat_matrix, int size){
     }
 }
 
+/**
+ * Turns a vector representing a flat matrix in to a matrix and organizes the values from the gather of all the matrices
+ * @param[out] matrix
+ * @param[in] flat_matrix
+ * @param[in] size
+ * @param[in] submatrixsize
+ * @param[in] numprocs
+ */
 void unflatten_main_matrix(int **matrix, int *flat_matrix, int size, int submatrixsize, int numprocs){
     int row = 0;
     int col = 0;
@@ -143,6 +197,12 @@ void unflatten_main_matrix(int **matrix, int *flat_matrix, int size, int submatr
     
 }
 
+/**
+ * Turns a vector representing a flat matrix in to a matrix
+ * @param[out] matrix
+ * @param[in] flat_matrix
+ * @param[in] size
+ */
 void unflatten_matrix(int **matrix, int *flat_matrix, int size){
     for (int i=0; i<size; i++){
         for (int j=0; j<size; j++){
@@ -151,6 +211,12 @@ void unflatten_matrix(int **matrix, int *flat_matrix, int size){
     }
 }
 
+/**
+ * Copies a matrix
+ * @param[in] original_matrix
+ * @param[out] new_matrix
+ * @param[in] size
+ */
 void copy_matrix(int **original_matrix, int **new_matrix, int size){
     for (int i =0; i<size; i++){
         for (int j=0; j<size; j++){
