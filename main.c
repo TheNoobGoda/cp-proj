@@ -345,6 +345,9 @@ int main(int argc, char *argv[]){
 
     if (rank == 0){
         unflatten_main_matrix(matrix, flat_matrix, size, submatrix_size, numprocs);
+        for (int i=0; i<size;i++){
+            matrix[i][i] = 0;
+        }
         print_matrix(matrix, size, size);
         freeMatrix(matrix, size);
         free(flat_matrix);
