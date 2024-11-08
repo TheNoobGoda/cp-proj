@@ -315,19 +315,16 @@ int main(int argc, char *argv[]){
             }      
             MPI_Bcast(flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, broadcast_row_rank, row_comm);
             unflatten_matrix(aux_matrix, flat_aux_matrix, submatrix_size);
-
-            min_plus_matrix_mult(aux_matrix, submatrix, result_submatrix, submatrix_size);
+        
+            min_plus_matrix_mult(aux_matrix, submatrix_b, result_submatrix, submatrix_size);
 
             MPI_Sendrecv(flat_submatrix_b, submatrix_size*submatrix_size, MPI_INT, dest, 0, flat_aux_matrix, submatrix_size*submatrix_size, MPI_INT, source, 0, col_comm, MPI_STATUS_IGNORE);
             unflatten_matrix(submatrix_b, flat_aux_matrix, submatrix_size);
             broadcast_row_rank ++;
             if (broadcast_row_rank >= q){broadcast_row_rank = 0;}
-
-            // if (rank == 1){
-            //     print_matrix(result_submatrix, submatrix_size, submatrix_size);
-            //     printf("\n");
-            // }
         }
+        copy_matrix(result_submatrix, submatrix, submatrix_size);
+        copy_matrix(result_submatrix, submatrix_b, submatrix_size);
     }
 
     
