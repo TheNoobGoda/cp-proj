@@ -10,10 +10,6 @@ NUM_PROCS = 4
 
 ARGS = matrix_examples/input6
 
-FILE1 = matrix_examples/output6
-
-FILE2 = result6
-
 all: $(TARGET)
 
 $(TARGET): $(SRC)
@@ -25,9 +21,6 @@ clean:
 
 run:
 	mpirun --oversubscribe -np $(NUM_PROCS) fox $(ARGS)
-
-compare_diff:
-	diff $(FILE1) $(FILE2)
 
 # Phony targets
 .PHONY: all clean run

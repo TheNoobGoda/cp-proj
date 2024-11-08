@@ -348,7 +348,8 @@ int main(int argc, char *argv[]){
         for (int i=0; i<size;i++){
             matrix[i][i] = 0;
         }
-        print_matrix(matrix, size, size);
+        //print_matrix(matrix, size, size);
+        save_result("result", matrix, size);
         freeMatrix(matrix, size);
         free(flat_matrix);
     }
