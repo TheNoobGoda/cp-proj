@@ -105,6 +105,7 @@ void min_plus_matrix_mult(int **matrix_a, int **matrix_b, int **result, int size
  * @param[in] filename
  * @param[in] matrix
  * @param[in] size
+ * @returns 0 on successe and 1 if there was an error
  */
 int save_result(const char *filename, int **matrix, int size){
     FILE *file = fopen(filename, "w");
