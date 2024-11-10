@@ -1,0 +1,202 @@
+\doxysection{main.\+c File Reference}
+\hypertarget{main_8c}{}\label{main_8c}\index{main.c@{main.c}}
+{\ttfamily \#include $<$mpi.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$limits.\+h$>$}\newline
+{\ttfamily \#include $<$math.\+h$>$}\newline
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*} \mbox{\hyperlink{main_8c_aa0f49d5eb502043d6ff12e26d39e1321}{read\+\_\+graph}} (const char \texorpdfstring{$\ast$}{*}file\+\_\+name, int \texorpdfstring{$\ast$}{*}size)
+\item 
+void \mbox{\hyperlink{main_8c_ae92bc71ae43cc9dd3feff39a04e5bf9f}{print\+\_\+matrix}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix, int rows, int cols)
+\item 
+void \mbox{\hyperlink{main_8c_a296f85cb1e819fbb095c3486c22338a2}{free\+Matrix}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix, int size)
+\item 
+void \mbox{\hyperlink{main_8c_acf55de297f38caffa6cb9b24b1637b62}{min\+\_\+plus\+\_\+matrix\+\_\+mult}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix\+\_\+a, int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix\+\_\+b, int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}result, int size)
+\item 
+int \mbox{\hyperlink{main_8c_ac5b29191bfdce49cd32fc0648b53199e}{save\+\_\+result}} (const char \texorpdfstring{$\ast$}{*}filename, int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix, int size)
+\item 
+void \mbox{\hyperlink{main_8c_a2d63c338caa29a6007a6cfd7729677a0}{flatten\+\_\+main\+\_\+matrix}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix, int \texorpdfstring{$\ast$}{*}flat\+\_\+matrix, int size, int submatrixsize, int numprocs)
+\item 
+void \mbox{\hyperlink{main_8c_a8de4992c487333a9a622a13416f2637a}{flatten\+\_\+matrix}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix, int \texorpdfstring{$\ast$}{*}flat\+\_\+matrix, int size)
+\item 
+void \mbox{\hyperlink{main_8c_a82fbe0715fdc53b12a557989b5736d99}{unflatten\+\_\+main\+\_\+matrix}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix, int \texorpdfstring{$\ast$}{*}flat\+\_\+matrix, int size, int submatrixsize, int numprocs)
+\item 
+void \mbox{\hyperlink{main_8c_afef7959d7a987784a036510c6aa54d82}{unflatten\+\_\+matrix}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}matrix, int \texorpdfstring{$\ast$}{*}flat\+\_\+matrix, int size)
+\item 
+void \mbox{\hyperlink{main_8c_a1b55f1bb1599d8f7f89196e509dd9038}{copy\+\_\+matrix}} (int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}original\+\_\+matrix, int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}new\+\_\+matrix, int size)
+\item 
+int \mbox{\hyperlink{main_8c_a0ddf1224851353fc92bfbff6f499fa97}{main}} (int argc, char \texorpdfstring{$\ast$}{*}argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{main_8c_a1b55f1bb1599d8f7f89196e509dd9038}\index{main.c@{main.c}!copy\_matrix@{copy\_matrix}}
+\index{copy\_matrix@{copy\_matrix}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{copy\_matrix()}{copy\_matrix()}}
+{\footnotesize\ttfamily \label{main_8c_a1b55f1bb1599d8f7f89196e509dd9038} 
+void copy\+\_\+matrix (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{original\+\_\+matrix}{, }\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{new\+\_\+matrix}{, }\item[{int}]{size}{}\end{DoxyParamCaption})}
+
+Copies a matrix 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em original\+\_\+matrix} & \\
+\hline
+\mbox{\texttt{ out}}  & {\em new\+\_\+matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a2d63c338caa29a6007a6cfd7729677a0}\index{main.c@{main.c}!flatten\_main\_matrix@{flatten\_main\_matrix}}
+\index{flatten\_main\_matrix@{flatten\_main\_matrix}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{flatten\_main\_matrix()}{flatten\_main\_matrix()}}
+{\footnotesize\ttfamily \label{main_8c_a2d63c338caa29a6007a6cfd7729677a0} 
+void flatten\+\_\+main\+\_\+matrix (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix}{, }\item[{int \texorpdfstring{$\ast$}{*}}]{flat\+\_\+matrix}{, }\item[{int}]{size}{, }\item[{int}]{submatrixsize}{, }\item[{int}]{numprocs}{}\end{DoxyParamCaption})}
+
+Flattens and prepares a matrix to be scaterred trhough all the processes 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em matrix} & \\
+\hline
+\mbox{\texttt{ out}}  & {\em flat\+\_\+matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em submatrixsize} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em numprocs} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a8de4992c487333a9a622a13416f2637a}\index{main.c@{main.c}!flatten\_matrix@{flatten\_matrix}}
+\index{flatten\_matrix@{flatten\_matrix}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{flatten\_matrix()}{flatten\_matrix()}}
+{\footnotesize\ttfamily \label{main_8c_a8de4992c487333a9a622a13416f2637a} 
+void flatten\+\_\+matrix (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix}{, }\item[{int \texorpdfstring{$\ast$}{*}}]{flat\+\_\+matrix}{, }\item[{int}]{size}{}\end{DoxyParamCaption})}
+
+Flattens a matrix in to a vector 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em matrix} & \\
+\hline
+\mbox{\texttt{ out}}  & {\em flat\+\_\+matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a296f85cb1e819fbb095c3486c22338a2}\index{main.c@{main.c}!freeMatrix@{freeMatrix}}
+\index{freeMatrix@{freeMatrix}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{freeMatrix()}{freeMatrix()}}
+{\footnotesize\ttfamily \label{main_8c_a296f85cb1e819fbb095c3486c22338a2} 
+void free\+Matrix (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix}{, }\item[{int}]{size}{}\end{DoxyParamCaption})}
+
+Frees the memory occupied by a matrix 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a0ddf1224851353fc92bfbff6f499fa97}\index{main.c@{main.c}!main@{main}}
+\index{main@{main}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily \label{main_8c_a0ddf1224851353fc92bfbff6f499fa97} 
+int main (\begin{DoxyParamCaption}\item[{int}]{argc}{, }\item[{char \texorpdfstring{$\ast$}{*}}]{argv}{\mbox{[}$\,$\mbox{]}}\end{DoxyParamCaption})}
+
+\Hypertarget{main_8c_acf55de297f38caffa6cb9b24b1637b62}\index{main.c@{main.c}!min\_plus\_matrix\_mult@{min\_plus\_matrix\_mult}}
+\index{min\_plus\_matrix\_mult@{min\_plus\_matrix\_mult}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{min\_plus\_matrix\_mult()}{min\_plus\_matrix\_mult()}}
+{\footnotesize\ttfamily \label{main_8c_acf55de297f38caffa6cb9b24b1637b62} 
+void min\+\_\+plus\+\_\+matrix\+\_\+mult (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix\+\_\+a}{, }\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix\+\_\+b}{, }\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{result}{, }\item[{int}]{size}{}\end{DoxyParamCaption})}
+
+Min-\/plus multiplication of the matrix to calculate the shortest path between pairs of nodes of a graph in the form of a adjacency matrix 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em matrix\+\_\+a} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em matrix\+\_\+b} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em result} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\mbox{\texttt{ out}}  & {\em result} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_ae92bc71ae43cc9dd3feff39a04e5bf9f}\index{main.c@{main.c}!print\_matrix@{print\_matrix}}
+\index{print\_matrix@{print\_matrix}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{print\_matrix()}{print\_matrix()}}
+{\footnotesize\ttfamily \label{main_8c_ae92bc71ae43cc9dd3feff39a04e5bf9f} 
+void print\+\_\+matrix (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix}{, }\item[{int}]{rows}{, }\item[{int}]{cols}{}\end{DoxyParamCaption})}
+
+Prints the input matrix to the console 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em rows} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em cols} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_aa0f49d5eb502043d6ff12e26d39e1321}\index{main.c@{main.c}!read\_graph@{read\_graph}}
+\index{read\_graph@{read\_graph}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{read\_graph()}{read\_graph()}}
+{\footnotesize\ttfamily \label{main_8c_aa0f49d5eb502043d6ff12e26d39e1321} 
+int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*} read\+\_\+graph (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{file\+\_\+name}{, }\item[{int \texorpdfstring{$\ast$}{*}}]{size}{}\end{DoxyParamCaption})}
+
+Reads a graph in the form of a adjacency matrix. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em file\+\_\+name} & \\
+\hline
+\mbox{\texttt{ out}}  & {\em size} & \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The matrix read from the file 
+\end{DoxyReturn}
+\Hypertarget{main_8c_ac5b29191bfdce49cd32fc0648b53199e}\index{main.c@{main.c}!save\_result@{save\_result}}
+\index{save\_result@{save\_result}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{save\_result()}{save\_result()}}
+{\footnotesize\ttfamily \label{main_8c_ac5b29191bfdce49cd32fc0648b53199e} 
+int save\+\_\+result (\begin{DoxyParamCaption}\item[{const char \texorpdfstring{$\ast$}{*}}]{filename}{, }\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix}{, }\item[{int}]{size}{}\end{DoxyParamCaption})}
+
+Saves the matrix in a file 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em filename} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_a82fbe0715fdc53b12a557989b5736d99}\index{main.c@{main.c}!unflatten\_main\_matrix@{unflatten\_main\_matrix}}
+\index{unflatten\_main\_matrix@{unflatten\_main\_matrix}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{unflatten\_main\_matrix()}{unflatten\_main\_matrix()}}
+{\footnotesize\ttfamily \label{main_8c_a82fbe0715fdc53b12a557989b5736d99} 
+void unflatten\+\_\+main\+\_\+matrix (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix}{, }\item[{int \texorpdfstring{$\ast$}{*}}]{flat\+\_\+matrix}{, }\item[{int}]{size}{, }\item[{int}]{submatrixsize}{, }\item[{int}]{numprocs}{}\end{DoxyParamCaption})}
+
+Turns a vector representing a flat matrix in to a matrix and organizes the values from the gather of all the matrices 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em flat\+\_\+matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em submatrixsize} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em numprocs} & \\
+\hline
+\end{DoxyParams}
+\Hypertarget{main_8c_afef7959d7a987784a036510c6aa54d82}\index{main.c@{main.c}!unflatten\_matrix@{unflatten\_matrix}}
+\index{unflatten\_matrix@{unflatten\_matrix}!main.c@{main.c}}
+\doxysubsubsection{\texorpdfstring{unflatten\_matrix()}{unflatten\_matrix()}}
+{\footnotesize\ttfamily \label{main_8c_afef7959d7a987784a036510c6aa54d82} 
+void unflatten\+\_\+matrix (\begin{DoxyParamCaption}\item[{int \texorpdfstring{$\ast$}{*}\texorpdfstring{$\ast$}{*}}]{matrix}{, }\item[{int \texorpdfstring{$\ast$}{*}}]{flat\+\_\+matrix}{, }\item[{int}]{size}{}\end{DoxyParamCaption})}
+
+Turns a vector representing a flat matrix in to a matrix 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ out}}  & {\em matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em flat\+\_\+matrix} & \\
+\hline
+\mbox{\texttt{ in}}  & {\em size} & \\
+\hline
+\end{DoxyParams}
