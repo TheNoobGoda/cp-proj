@@ -266,6 +266,9 @@ int main(int argc, char *argv[]){
 
         submatrix_size = size / sqrt(numprocs);
     }
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    double start = MPI_Wtime();
     
     MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
     MPI_Bcast(&submatrix_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -385,5 +388,9 @@ int main(int argc, char *argv[]){
         free(flat_matrix);
     }
 
+    MPI_Barrier(MPI_COMM_WORLD);
+    double end = MPI_Wtime();
+    if (rank ==0) {printf("Execution time: %f\n",end-start);}
+    
     MPI_Finalize();
 }
