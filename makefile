@@ -21,11 +21,15 @@ $(TARGET): $(SRC)
 
 clean:
 	rm -f $(TARGET)
-	rm result*
+	rm -f result*
+
 
 run:
 	mpirun --oversubscribe -np $(NUM_PROCS) fox $(ARGS)
 
+
+run_file:
+	mpirun --oversubscribe -np $(NUM_PROCS) fox $(ARGS) -hostfile $(HOSTFILE)
 compare_diff:
 	diff $(FILE1) $(FILE2)
 

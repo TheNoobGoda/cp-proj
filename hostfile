@@ -1,0 +1,5 @@
+# each machine has 12 cpu's
+l220 slots=12
+l210 slots=12
+l209 slots=12
+
