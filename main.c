@@ -72,7 +72,7 @@ void freeMatrix(int **matrix, int size) {
 }
 
 /**
- * Min-plus multiplication of the matrix to calculate the shortest path between pairs of nodes of a graph in the form of a adjacency matrix
+ * Min-plus multiplication of the matrix to calculate the shortest path between pairs of nodes of a graph in the form of an adjacency matrix
  * @param[in] matrix_a
  * @param[in] matrix_b
  * @param[in] result
